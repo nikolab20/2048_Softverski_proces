@@ -1,0 +1,7 @@
+/*
+ * Empty Stylesheet file.
+ */
+
+.slika {          
+    -fx-background-image: url("../images/2048-512px.png");
+}
