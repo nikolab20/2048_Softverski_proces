@@ -1,0 +1,8 @@
+/*
+ * Empty Stylesheet file.
+ */
+
+
+.login {          
+    -fx-background-image: url("../images/login.png");
+}

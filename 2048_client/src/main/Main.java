@@ -23,12 +23,11 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("/gui/FXMLDocument.fxml"));
-        System.out.println(root);
-
+        
         Scene scene = new Scene(root);
         scene.getStylesheets().add(getClass().getResource("/css/splashscreenfxml.css").toExternalForm());
         stage.setScene(scene);
-//        stage.initStyle(StageStyle.UNDECORATED);
+        stage.setTitle("2048 Game");
         stage.setResizable(false);
         stage.show();
     }

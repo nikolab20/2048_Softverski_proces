@@ -5,6 +5,7 @@
  */
 package gui;
 
+import java.awt.Panel;
 import javafx.scene.image.Image;
 import java.io.IOException;
 import java.net.URL;
@@ -17,7 +18,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import main.Main;
 
@@ -40,33 +43,23 @@ public class FXMLDocumentController implements Initializable {
     private void loadSplashScreen() {
         try {
             Main.isSplashLoaded = true;
-            
-            System.out.println("Usao");
+
             StackPane pane = FXMLLoader.load(getClass().getResource("/gui/splashScreen/SplashScreenFXML.fxml"));
             root.getChildren().setAll(pane);
             Image image = new Image("/images/2048-512px.png");
             ((ImageView) pane.getChildren().get(0)).setImage(image);
-            
-            FadeTransition fadeIn = new FadeTransition(Duration.seconds(3), pane);
+
+            FadeTransition fadeIn = new FadeTransition(Duration.seconds(5), pane);
             fadeIn.setFromValue(0);
             fadeIn.setToValue(1);
             fadeIn.setCycleCount(1);
 
-            FadeTransition fadeOut = new FadeTransition(Duration.seconds(3), pane);
-            fadeOut.setFromValue(1);
-            fadeOut.setToValue(0);
-            fadeOut.setCycleCount(0);
-
             fadeIn.play();
 
             fadeIn.setOnFinished((e) -> {
-                fadeOut.play();
-            });
-
-            fadeOut.setOnFinished((e) -> {
                 try {
-                    AnchorPane parentContent = FXMLLoader.load(getClass().getResource("/gui/FXMLDocument.fxml"));
-                    root.getChildren().setAll(parentContent);
+                    GridPane loginPanel = FXMLLoader.load(getClass().getResource("/gui/login/LoginFormFXML.fxml"));
+                    pane.getChildren().setAll(loginPanel);
                 } catch (IOException ex) {
                     Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
                 }
