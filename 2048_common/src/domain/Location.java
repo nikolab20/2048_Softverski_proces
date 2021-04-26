@@ -64,10 +64,7 @@ public class Location {
     }
 
     public Location offset(Direction direction) {
-        // TO-DO: Step 12. Return the location of the tile in the selected direction
-
-        // -->
-        return new Location(x, y);
+        return new Location(x + direction.getX(), y + direction.getY());
     }
 
     public double getLayoutX(int CELL_SIZE) {

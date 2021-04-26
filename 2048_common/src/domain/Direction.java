@@ -36,6 +36,6 @@ public enum Direction {
     }
 
     public static Direction valueFor(KeyCode keyCode) {
-        return RIGHT;
+        return valueOf(keyCode.name());
     }
 }

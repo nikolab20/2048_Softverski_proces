@@ -5,9 +5,11 @@
  */
 package gui.game;
 
+import domain.Direction;
 import gui.gameManager.GameManager;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
@@ -37,6 +39,14 @@ public class Game extends Application {
 
         scene.getStylesheets().add(Game.class.getResource("game.css").toExternalForm());
         root.getStyleClass().addAll("game-root");
+
+        scene.setOnKeyPressed(ke -> {
+            KeyCode keyCode = ke.getCode();
+            if (keyCode.isArrowKey()) {
+                Direction dir = Direction.valueFor(keyCode);
+                gameManager.move(dir);
+            }
+        });
 
         primaryStage.setTitle("2048FX");
         primaryStage.setScene(scene);

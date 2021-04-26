@@ -5,10 +5,14 @@
  */
 package gui.board;
 
+import domain.GridOperator;
 import domain.Location;
 import gui.tile.Tile;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
 import javafx.scene.paint.Color;
 import javafx.animation.Timeline;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -21,6 +25,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
 
 /**
  *
@@ -98,6 +103,22 @@ public class Board extends Group {
 
         vGame.getChildren().add(hMid);
 
+        lblPoints.getStyleClass().addAll("game-label", "game-points");
+        lblPoints.setAlignment(Pos.CENTER);
+        lblPoints.setMinWidth(100);
+        getChildren().add(lblPoints);
+
+        lblPoints.textProperty().bind(Bindings.createStringBinding(()
+                -> (gameMovePoints.get() > 0) ? "+".concat(Integer.toString(gameMovePoints.get())) : "",
+                gameMovePoints.asObject()));
+        lblScore.textProperty().bind(gameScoreProperty.asString());
+
+        lblScore.textProperty().addListener((ov, s, s1) -> {
+            lblPoints.setLayoutX(0);
+            double midScoreX = vScore.localToScene(vScore.getWidth() / 2d, 0).getX();
+            lblPoints.setLayoutX(lblPoints.sceneToLocal(midScoreX, 0).getX() - lblPoints.getWidth() / 2d);
+        });
+
         lblTitle.getStyleClass().addAll("game-label", "game-title");
         lblSubtitle.getStyleClass().addAll("game-label", "game-subtitle");
         vScore.getStyleClass().add("game-vbox");
@@ -106,6 +127,19 @@ public class Board extends Group {
         vRecord.getStyleClass().add("game-vbox");
         lblTitBest.getStyleClass().addAll("game-label", "game-titScore");
         lblBest.getStyleClass().addAll("game-label", "game-score");
+
+        final KeyValue kvO0 = new KeyValue(lblPoints.opacityProperty(), 1);
+        final KeyValue kvY0 = new KeyValue(lblPoints.layoutYProperty(), 20);
+        final KeyValue kvO1 = new KeyValue(lblPoints.opacityProperty(), 0);
+        final KeyValue kvY1 = new KeyValue(lblPoints.layoutYProperty(), 100);
+        final KeyFrame kfO0 = new KeyFrame(Duration.ZERO, kvO0);
+        final KeyFrame kfY0 = new KeyFrame(Duration.ZERO, kvY0);
+
+        Duration animationDuration = Duration.millis(600);
+        final KeyFrame kfO1 = new KeyFrame(animationDuration, kvO1);
+        final KeyFrame kfY1 = new KeyFrame(animationDuration, kvY1);
+
+        animateAddedPoints.getKeyFrames().addAll(kfO0, kfY0, kfO1, kfY1);
     }
 
     private Rectangle createCell(int i, int j) {
@@ -123,11 +157,10 @@ public class Board extends Group {
     }
 
     private void createGrid() {
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                gridGroup.getChildren().add(createCell(i, j));
-            }
-        }
+        GridOperator.traverseGrid((i, j) -> {
+            gridGroup.getChildren().add(createCell(i, j));
+            return 0;
+        });
 
         gridGroup.getStyleClass().add("game-grid");
         hBottom.getStyleClass().add("game-backGrid");
@@ -139,6 +172,9 @@ public class Board extends Group {
         hBottom.setMinSize(GRID_WIDTH, GRID_WIDTH);
         hBottom.setPrefSize(GRID_WIDTH, GRID_WIDTH);
         hBottom.setMaxSize(GRID_WIDTH, GRID_WIDTH);
+
+        Rectangle rect = new Rectangle(GRID_WIDTH, GRID_WIDTH);
+        hBottom.setClip(rect);
 
         hBottom.getChildren().add(gridGroup);
 
@@ -173,9 +209,12 @@ public class Board extends Group {
     }
 
     public void addPoints(int points) {
+        gameMovePoints.set(gameMovePoints.get() + points);
+        gameScoreProperty.set(gameScoreProperty.get() + points);
     }
 
     public void animateScore() {
+        animateAddedPoints.playFromStart();
     }
 
     private void initGameProperties() {

@@ -5,6 +5,7 @@
  */
 package domain;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntBinaryOperator;
@@ -22,9 +23,18 @@ public class GridOperator {
 
     public static int traverseGrid(IntBinaryOperator func) {
         AtomicInteger at = new AtomicInteger();
+
+        traversalX.forEach(x -> {
+            traversalY.forEach(y -> {
+                at.addAndGet(func.applyAsInt(x, y));
+            });
+        });
+
         return at.get();
     }
 
     public static void sortGrid(Direction direction) {
+        Collections.sort(traversalX, direction.equals(Direction.RIGHT) ? Collections.reverseOrder() : Integer::compareTo);
+        Collections.sort(traversalY, direction.equals(Direction.DOWN) ? Collections.reverseOrder() : Integer::compareTo);
     }
 }
