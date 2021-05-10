@@ -8,8 +8,6 @@ package domain;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Objects;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -22,6 +20,10 @@ public class User implements DomainObject {
     private String password;
 
     public User() {
+    }
+    
+    public User(String username) {
+        this.username = username;
     }
 
     public User(Long id, String username, String password) {
@@ -61,7 +63,7 @@ public class User implements DomainObject {
 
     @Override
     public String getWhereCondition() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return "username='" + username + "'";
     }
 
     @Override

@@ -67,6 +67,7 @@ public class Board extends Group {
     public Board() {
         createScore();
         createGrid();
+        initGameProperties();
     }
 
     private void createScore() {
@@ -92,6 +93,15 @@ public class Board extends Group {
         vScores.getChildren().addAll(hScores, vFill);
 
         hTop.getChildren().addAll(lblTitle, lblSubtitle, hFill, vScores);
+
+        lblTitle.getStyleClass().addAll("game-label", "game-title");
+        lblSubtitle.getStyleClass().addAll("game-label", "game-subtitle");
+        vScore.getStyleClass().add("game-vbox");
+        lblTit.getStyleClass().addAll("game-label", "game-titScore");
+        lblScore.getStyleClass().addAll("game-label", "game-score");
+        vRecord.getStyleClass().add("game-vbox");
+        lblTitBest.getStyleClass().addAll("game-label", "game-titScore");
+        lblBest.getStyleClass().addAll("game-label", "game-score");
 
         hTop.setMinSize(GRID_WIDTH, TOP_HEIGHT);
         hTop.setPrefSize(GRID_WIDTH, TOP_HEIGHT);
@@ -119,15 +129,6 @@ public class Board extends Group {
             lblPoints.setLayoutX(lblPoints.sceneToLocal(midScoreX, 0).getX() - lblPoints.getWidth() / 2d);
         });
 
-        lblTitle.getStyleClass().addAll("game-label", "game-title");
-        lblSubtitle.getStyleClass().addAll("game-label", "game-subtitle");
-        vScore.getStyleClass().add("game-vbox");
-        lblTit.getStyleClass().addAll("game-label", "game-titScore");
-        lblScore.getStyleClass().addAll("game-label", "game-score");
-        vRecord.getStyleClass().add("game-vbox");
-        lblTitBest.getStyleClass().addAll("game-label", "game-titScore");
-        lblBest.getStyleClass().addAll("game-label", "game-score");
-
         final KeyValue kvO0 = new KeyValue(lblPoints.opacityProperty(), 1);
         final KeyValue kvY0 = new KeyValue(lblPoints.layoutYProperty(), 20);
         final KeyValue kvO1 = new KeyValue(lblPoints.opacityProperty(), 0);
@@ -149,10 +150,11 @@ public class Board extends Group {
         cell.setFill(Color.WHITE);
         cell.setStroke(Color.GREY);
 
-        cell.setArcHeight(CELL_SIZE / 6d);
-        cell.setArcWidth(CELL_SIZE / 6d);
-        cell.getStyleClass().add("game-grid-cell");
-
+        if (cell != null) {
+            cell.setArcHeight(CELL_SIZE / 6d);
+            cell.setArcWidth(CELL_SIZE / 6d);
+            cell.getStyleClass().add("game-grid-cell");
+        }
         return cell;
     }
 
@@ -188,10 +190,9 @@ public class Board extends Group {
     }
 
     public void moveTile(Tile tile, Location location) {
-        double layoutX = tile.getLocation().getLayoutX(CELL_SIZE) - (tile.getMinWidth()
-                / 2);
-        double layoutY = tile.getLocation().getLayoutY(CELL_SIZE) - (tile.getMinHeight()
-                / 2);
+        double layoutX = location.getLayoutX(CELL_SIZE) - (tile.getMinWidth() / 2);
+        double layoutY = location.getLayoutY(CELL_SIZE) - (tile.getMinHeight() / 2);
+
         tile.setLayoutX(layoutX);
         tile.setLayoutY(layoutY);
     }
@@ -228,6 +229,39 @@ public class Board extends Group {
         buttonsOverlay.setTranslateY(TOP_HEIGHT + GAP_HEIGHT + GRID_WIDTH / 2);
         buttonsOverlay.setMinSize(GRID_WIDTH, GRID_WIDTH / 2);
         buttonsOverlay.setSpacing(10);
+
+        bTry.getStyleClass().add("game-button");
+        bTry.setOnAction(e -> {
+            getChildren().removeAll(overlay, buttonsOverlay);
+            gridGroup.getChildren().removeIf(c -> c instanceof Tile);
+            resetGame.set(false);
+            gameScoreProperty.set(0);
+            gameWonProperty.set(false);
+            gameOverProperty.set(false);
+            resetGame.set(true);
+        });
+        bContinue.getStyleClass().add("game-button");
+        bContinue.setOnAction(e -> getChildren().removeAll(overlay, buttonsOverlay));
+
+        gameOverProperty.addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                overlay.getStyleClass().setAll("game-overlay", "game-overlay-over");
+                lOvrText.setText("Game over!");
+                lOvrText.getStyleClass().setAll("game-label", "game-lblOver");
+                buttonsOverlay.getChildren().setAll(bTry);
+                this.getChildren().addAll(overlay, buttonsOverlay);
+            }
+        });
+
+        gameWonProperty.addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                overlay.getStyleClass().setAll("game-overlay", "game-overlay-won");
+                lOvrText.setText("You win!");
+                lOvrText.getStyleClass().setAll("game-label", "game-lblWon");
+                buttonsOverlay.getChildren().setAll(bContinue, bTry);
+                this.getChildren().addAll(overlay, buttonsOverlay);
+            }
+        });
     }
 
     public void setGameOver(boolean gameOver) {

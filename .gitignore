@@ -26,3 +26,5 @@ hs_err_pid*
 /2048_common/dist/
 /2048_common/build/
 /2048_server/build/
+/2048_server/dist/
+/server/nbproject/private/

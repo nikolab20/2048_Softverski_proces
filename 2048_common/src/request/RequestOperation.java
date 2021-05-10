@@ -12,5 +12,6 @@ import java.io.Serializable;
  * @author nikolab
  */
 public enum RequestOperation implements Serializable {
-    LOG_IN
+    LOG_IN,
+    SING_UP
 }

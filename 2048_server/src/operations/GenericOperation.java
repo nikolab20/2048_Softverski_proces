@@ -42,7 +42,7 @@ public abstract class GenericOperation<T extends DomainObject, R> {
 
     }
     
-    private final void templateExecute(T entity) throws Exception {
+    public final void templateExecute(T entity) throws Exception {
         try {
             validate(entity);
             try {

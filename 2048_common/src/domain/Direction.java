@@ -5,13 +5,14 @@
  */
 package domain;
 
+import java.io.Serializable;
 import javafx.scene.input.KeyCode;
 
 /**
  *
  * @author nikolab
  */
-public enum Direction {
+public enum Direction implements Serializable {
     UP(0, -1), RIGHT(1, 0), DOWN(0, 1), LEFT(-1, 0);
 
     private final int y;

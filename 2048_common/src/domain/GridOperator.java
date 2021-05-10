@@ -5,6 +5,7 @@
  */
 package domain;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -16,20 +17,18 @@ import java.util.stream.IntStream;
  *
  * @author nikolab
  */
-public class GridOperator {
+public class GridOperator implements Serializable {
 
     private static final List<Integer> traversalX = IntStream.range(0, 4).boxed().collect(Collectors.toList());
     private static final List<Integer> traversalY = IntStream.range(0, 4).boxed().collect(Collectors.toList());
 
     public static int traverseGrid(IntBinaryOperator func) {
         AtomicInteger at = new AtomicInteger();
-
         traversalX.forEach(x -> {
             traversalY.forEach(y -> {
                 at.addAndGet(func.applyAsInt(x, y));
             });
         });
-
         return at.get();
     }
 

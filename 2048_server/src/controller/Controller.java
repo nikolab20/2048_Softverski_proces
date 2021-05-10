@@ -13,8 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author nikolab
  */
 @RestController
-@RequestMapping("server")
+@RequestMapping("api")
 public class Controller {
-    
    
 }

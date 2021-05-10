@@ -21,7 +21,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
@@ -50,6 +49,14 @@ public class GameManager extends Group {
     public GameManager() {
         board = new Board();
         getChildren().add(board);
+
+        board.resetGameProperty().addListener((ov, b, b1) -> {
+            if (b1) {
+                initializeGameGrid();
+                startGame();
+            }
+        });
+
         initializeGameGrid();
         startGame();
     }
@@ -57,6 +64,7 @@ public class GameManager extends Group {
     private void initializeGameGrid() {
         gameGrid.clear();
         locations.clear();
+
         GridOperator.traverseGrid((i, j) -> {
             Location location = new Location(i, j);
             locations.add(location);
@@ -93,33 +101,35 @@ public class GameManager extends Group {
         board.setPoints(0);
 
         tilesWereMoved = GridOperator.traverseGrid((i, j) -> {
-            Tile t = gameGrid.get(new Location(i, j));
-            if (t != null) {
-                final Location newLoc = findFarthestLocation(t.getLocation(), direction);
+            AtomicInteger result = new AtomicInteger();
+            optionalTile(new Location(i, j)).ifPresent(t1 -> {
+                final Location newLoc = findFarthestLocation(t1.getLocation(), direction);
+                Location nextLocation = newLoc.offset(direction); // calculates to a possible merge
+                optionalTile(nextLocation).filter(t2 -> t1.isMergeable(t2) && !t2.isMerged()).ifPresent(t2 -> {
+                    t2.merge(t1);
+                    t2.toFront();
+                    gameGrid.put(nextLocation, t2);
+                    gameGrid.replace(t1.getLocation(), null);
+                    board.addPoints(t2.getValue());
+                    if (t2.getValue() == 2048) {
+                        board.setGameWin(true);
+                    }
+                    parallelTransition.getChildren().add(animateExistingTile(t1, nextLocation));
+                    parallelTransition.getChildren().add(animateMergedTile(t2));
+                    mergedToBeRemoved.add(t1);
 
-                Location nextLocation = newLoc.offset(direction);
-                Tile tileToBeMerged = nextLocation.isValidFor() ? gameGrid.get(nextLocation) : null;
-                if (tileToBeMerged != null && !tileToBeMerged.isMerged() && t.isMergeable(tileToBeMerged)) {
-                    tileToBeMerged.merge(t);
-                    tileToBeMerged.toFront();
-                    gameGrid.put(nextLocation, tileToBeMerged);
-                    gameGrid.replace(t.getLocation(), null);
-                    parallelTransition.getChildren().add(animateExistingTile(t, nextLocation));
-                    parallelTransition.getChildren().add(animateMergedTile(tileToBeMerged));
-                    mergedToBeRemoved.add(t);
-                    board.addPoints(tileToBeMerged.getValue());
-                    return 1;
-                }
+                    result.set(1);
+                });
 
-                if (!newLoc.equals(t.getLocation())) {
-                    parallelTransition.getChildren().add(animateExistingTile(t, newLoc));
-                    gameGrid.put(newLoc, t);
-                    gameGrid.replace(t.getLocation(), null);
-                    t.setLocation(newLoc);
-                    return 1;
+                if (result.get() == 0 && !newLoc.equals(t1.getLocation())) {
+                    parallelTransition.getChildren().add(animateExistingTile(t1, newLoc));
+                    gameGrid.put(newLoc, t1);
+                    gameGrid.replace(t1.getLocation(), null);
+                    t1.setLocation(newLoc);
+                    result.set(1);
                 }
-            }
-            return 0;
+            });
+            return result.get();
         });
 
         board.animateScore();
@@ -141,8 +151,10 @@ public class GameManager extends Group {
             } else {
                 if (mergeMovementsAvailable() == 0) {
                     System.out.println("Game Over");
+                    board.setGameOver(true);
                 }
             }
+
         });
 
         synchronized (gameGrid) {
@@ -154,35 +166,30 @@ public class GameManager extends Group {
 
     private Location findFarthestLocation(Location location, Direction direction) {
         Location farthest = location;
-
         do {
             farthest = location;
             location = farthest.offset(direction);
         } while (location.isValidFor() && gameGrid.get(location) == null);
-
         return farthest;
     }
 
     private Timeline animateExistingTile(Tile tile, Location newLocation) {
         Timeline timeline = new Timeline();
-
         KeyValue kvX = new KeyValue(tile.layoutXProperty(),
-                newLocation.getLayoutX(Board.CELL_SIZE) - (tile.getMinHeight() / 2),
-                Interpolator.EASE_OUT);
+                newLocation.getLayoutX(Board.CELL_SIZE) - (tile.getMinHeight() / 2), Interpolator.EASE_OUT);
         KeyValue kvY = new KeyValue(tile.layoutYProperty(),
-                newLocation.getLayoutY(Board.CELL_SIZE) - (tile.getMinHeight() / 2),
-                Interpolator.EASE_OUT);
+                newLocation.getLayoutY(Board.CELL_SIZE) - (tile.getMinHeight() / 2), Interpolator.EASE_OUT);
+
         KeyFrame kfX = new KeyFrame(Duration.millis(65), kvX);
         KeyFrame kfY = new KeyFrame(Duration.millis(65), kvY);
+
         timeline.getKeyFrames().add(kfX);
         timeline.getKeyFrames().add(kfY);
-
         return timeline;
     }
 
     private Location findRandomAvailableLocation() {
         Location location = null;
-
         List<Location> availableLocations = locations.stream().filter(l -> gameGrid.get(l) == null)
                 .collect(Collectors.toList());
 
@@ -192,7 +199,6 @@ public class GameManager extends Group {
 
         Collections.shuffle(availableLocations);
         location = availableLocations.get(0);
-
         return location;
     }
 
@@ -208,7 +214,12 @@ public class GameManager extends Group {
         scaleTransition.setToX(1.0);
         scaleTransition.setToY(1.0);
         scaleTransition.setInterpolator(Interpolator.EASE_OUT);
-
+        scaleTransition.setOnFinished(e -> {
+            if (gameGrid.values().parallelStream().noneMatch(Objects::isNull) && mergeMovementsAvailable() == 0) {
+                System.out.println("Game Over");
+                board.setGameOver(true);
+            }
+        });
         scaleTransition.play();
     }
 
@@ -217,29 +228,24 @@ public class GameManager extends Group {
         scale0.setToX(1.2);
         scale0.setToY(1.2);
         scale0.setInterpolator(Interpolator.EASE_IN);
+
         final ScaleTransition scale1 = new ScaleTransition(Duration.millis(80), tile);
         scale1.setToX(1.0);
         scale1.setToY(1.0);
         scale1.setInterpolator(Interpolator.EASE_OUT);
+
         return new SequentialTransition(scale0, scale1);
     }
 
     private int mergeMovementsAvailable() {
         final AtomicInteger numMergeableTile = new AtomicInteger();
-
         Stream.of(Direction.UP, Direction.LEFT).parallel().forEach(direction -> {
             GridOperator.traverseGrid((x, y) -> {
                 Location thisloc = new Location(x, y);
-                Tile t1 = gameGrid.get(thisloc);
-                if (t1 != null) {
-                    Location nextLoc = thisloc.offset(direction);
-                    if (nextLoc.isValidFor()) {
-                        Tile t2 = gameGrid.get(nextLoc);
-                        if (t2 != null && t1.isMergeable(t2)) {
-                            numMergeableTile.incrementAndGet();
-                        }
-                    }
-                }
+                optionalTile(thisloc).ifPresent(t1 -> {
+                    optionalTile(thisloc.offset(direction)).filter(t2 -> t1.isMergeable(t2))
+                            .ifPresent(t2 -> numMergeableTile.incrementAndGet());
+                });
                 return 0;
             });
         });
@@ -248,6 +254,6 @@ public class GameManager extends Group {
     }
 
     private Optional<Tile> optionalTile(Location loc) {
-        return null;
+        return Optional.ofNullable(gameGrid.get(loc));
     }
 }
