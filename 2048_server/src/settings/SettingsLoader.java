@@ -34,7 +34,7 @@ public class SettingsLoader {
 
     private void loadProperties() throws IOException {
         properties = new Properties();
-        properties.load(SettingsLoader.class.getResourceAsStream("/settings.properties"));
+        properties.load(SettingsLoader.class.getResourceAsStream("/props/settings.properties"));
     }
 
     public String getProperty(String key) {

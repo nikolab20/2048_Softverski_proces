@@ -34,7 +34,7 @@ public class PropertiesReader {
 
     private void loadProperties() throws IOException {
         properties = new Properties();
-        properties.load(PropertiesReader.class.getResourceAsStream("/app.properties"));
+        properties.load(PropertiesReader.class.getResourceAsStream("/props/app.properties"));
     }
 
     public String get(String key) {

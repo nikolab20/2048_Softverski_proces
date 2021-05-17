@@ -8,9 +8,9 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="380.0" prefWidth="443.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ssfx1.FXMLDocumentController">
+<AnchorPane id="AnchorPane" fx:id="root" prefHeight="750.0" prefWidth="599.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.menu.MeniController">
     <children>
-      <MenuBar fx:id="MainMenu" layoutX="1.0" layoutY="2.0" prefHeight="25.0" prefWidth="435.0">
+      <MenuBar fx:id="MainMenu" layoutX="1.0" layoutY="2.0" prefHeight="29.0" prefWidth="654.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <menus>
   <Menu fx:id="game" mnemonicParsing="false" text="Game ">
   
@@ -41,5 +41,6 @@
           </Menu>           
         </menus>
       </MenuBar>
+      <StackPane fx:id="stackPane" layoutY="31.0" prefHeight="720.0" prefWidth="654.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
     </children>
 </AnchorPane>

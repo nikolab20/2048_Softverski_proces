@@ -21,9 +21,14 @@ public class User implements DomainObject {
 
     public User() {
     }
-    
+
     public User(String username) {
         this.username = username;
+    }
+
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
     }
 
     public User(Long id, String username, String password) {

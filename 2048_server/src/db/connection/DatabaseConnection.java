@@ -8,6 +8,8 @@ package db.connection;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import settings.SettingsLoader;
 
 /**
@@ -16,7 +18,7 @@ import settings.SettingsLoader;
  */
 public class DatabaseConnection {
 
-    private final Connection connection;
+    private static Connection connection;
     private static DatabaseConnection instance;
 
     private DatabaseConnection() throws SQLException {
@@ -34,6 +36,7 @@ public class DatabaseConnection {
             }
             return instance;
         } catch (SQLException ex) {
+            System.out.println(ex);
             throw new RuntimeException();
         }
     }

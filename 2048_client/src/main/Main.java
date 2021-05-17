@@ -5,12 +5,11 @@
  */
 package main;
 
+import gui.GameStage;
+import gui.game.Game;
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 /**
  *
@@ -21,15 +20,18 @@ public class Main extends Application {
     public static boolean isSplashLoaded = false;
 
     @Override
+    public void init() throws Exception {
+        Font.loadFont(Game.class.getResource("ClearSans-Bold.ttf").toExternalForm(), 10.0);
+    }
+    
+
+    @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/gui/FXMLDocument.fxml"));
-        
-        Scene scene = new Scene(root);
-        scene.getStylesheets().add(getClass().getResource("/css/splashscreenfxml.css").toExternalForm());
-        stage.setScene(scene);
         stage.setTitle("2048 Game");
-        stage.setResizable(false);
+        stage.setResizable(true);
+        GameStage.setStage(stage);
         stage.show();
+        GameStage.getInstance().setScene("/gui/splashScreen/SplashScreenFXML.fxml");
     }
 
     /**

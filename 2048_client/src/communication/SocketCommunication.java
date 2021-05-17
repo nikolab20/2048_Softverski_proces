@@ -37,6 +37,7 @@ public class SocketCommunication {
             ObjectOutputStream outSocket = new ObjectOutputStream(socket.getOutputStream());
             outSocket.writeObject(request);
         } catch (IOException ex) {
+            System.out.println("Greska");
             throw new IOException(ex.getMessage());
         }
     }
