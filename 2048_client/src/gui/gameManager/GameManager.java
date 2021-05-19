@@ -5,9 +5,11 @@
  */
 package gui.gameManager;
 
+import communication.Controller;
 import domain.Direction;
 import domain.GridOperator;
 import domain.Location;
+import domain.User;
 import gui.board.Board;
 import gui.tile.Tile;
 import java.util.ArrayList;
@@ -31,6 +33,7 @@ import javafx.animation.SequentialTransition;
 import javafx.animation.Timeline;
 import javafx.scene.Group;
 import javafx.util.Duration;
+import utils.UserSession;
 
 /**
  *
@@ -88,9 +91,10 @@ public class GameManager extends Group {
 
     private void redrawTilesInGameGrid() {
         gameGrid.values().stream().filter(Objects::nonNull).forEach(board::addTile);
+        System.out.println(board.getGridGroup().getChildren().stream().collect(Collectors.toList()));
     }
 
-    public void move(Direction direction) {
+    public void move(Direction direction) throws Exception {
         synchronized (gameGrid) {
             if (movingTiles) {
                 return;
@@ -162,6 +166,21 @@ public class GameManager extends Group {
         }
         parallelTransition.play();
         parallelTransition.getChildren().clear();
+
+        if (board.getScore() > UserSession.getInstance().getUser().getTopScore()) {
+            try {
+                User user = UserSession.getInstance().getUser();
+                user.setTopScore(board.getScore());
+                user = Controller.getInstance().update(user);
+                UserSession.getInstance().setUser(user);
+            } catch (Exception ex) {
+                throw ex;
+            }
+        }
+
+        if (board.getGameOver()) {
+            Controller.getInstance().endGame();
+        }
     }
 
     private Location findFarthestLocation(Location location, Direction direction) {

@@ -6,6 +6,7 @@
 package operations;
 
 import db.IDatabaseBroker;
+import db.connection.DatabaseConnection;
 import db.impl.DatabaseBroker;
 import domain.DomainObject;
 import request.RequestOperation;
@@ -35,13 +36,13 @@ public abstract class GenericOperation<T extends DomainObject, R> {
     protected abstract void execute(T entity) throws Exception;
 
     private void commitTransaction() throws Exception {
-
+        DatabaseConnection.getInstance().commitTransaction();
     }
 
     private void rollbackTransaction() throws Exception {
-
+        DatabaseConnection.getInstance().rollbackTransaction();
     }
-    
+
     public final void templateExecute(T entity) throws Exception {
         try {
             validate(entity);

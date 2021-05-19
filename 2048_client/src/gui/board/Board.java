@@ -209,6 +209,10 @@ public class Board extends Group {
         return gameMovePoints.get();
     }
 
+    public int getScore() {
+        return gameScoreProperty.get();
+    }
+
     public void addPoints(int points) {
         gameMovePoints.set(gameMovePoints.get() + points);
         gameScoreProperty.set(gameScoreProperty.get() + points);
@@ -266,6 +270,10 @@ public class Board extends Group {
 
     public void setGameOver(boolean gameOver) {
         gameOverProperty.set(gameOver);
+    }
+
+    public boolean getGameOver() {
+        return gameOverProperty.get();
     }
 
     public void setGameWin(boolean won) {

@@ -100,6 +100,7 @@ public class DatabaseBroker implements IDatabaseBroker {
         try (Statement st = DatabaseConnection.getInstance().getConnection()
                 .prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             int rowcount = st.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
+            System.out.println(rowcount);
             if (rowcount <= 0) {
                 throw new RuntimeException("Update query not executed");
             }

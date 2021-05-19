@@ -16,7 +16,8 @@
   
                <items>
   
-            <MenuItem fx:id="start" mnemonicParsing="false" onAction="#startGame" text="Start" />  
+            <MenuItem fx:id="start" mnemonicParsing="false" onAction="#startGame" text="Start" />
+                  <MenuItem fx:id="undo" mnemonicParsing="false" text="Undo" />  
             <MenuItem fx:id="exit" mnemonicParsing="false" onAction="#exit" text="Exit" />  
                </items>
   

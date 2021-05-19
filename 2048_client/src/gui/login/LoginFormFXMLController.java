@@ -16,6 +16,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import utils.UserSession;
 
 /**
  * FXML Controller class
@@ -41,7 +42,7 @@ public class LoginFormFXMLController implements Initializable {
 
     @FXML
     private Label lblPassword;
-    
+
     @FXML
     private Label lblError;
 
@@ -51,6 +52,7 @@ public class LoginFormFXMLController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         addLoginListener();
+        addSingUpListener();
     }
 
     private void addLoginListener() {
@@ -59,11 +61,18 @@ public class LoginFormFXMLController implements Initializable {
             String password = pfPassword.getText();
             try {
                 User user = Controller.getInstance().logIn(username, password);
+                UserSession.getInstance().setUser(user);
                 GameStage.getInstance().setScene("/gui/menu/Meni.fxml");
             } catch (Exception ex) {
                 System.out.println(ex);
                 lblError.setText(ex.getMessage());
             }
+        });
+    }
+
+    private void addSingUpListener() {
+        btnSingUp.setOnMouseClicked((event) -> {
+            GameStage.getInstance().setScene("/gui/singUp/SingUpFormFXML.fxml");
         });
     }
 

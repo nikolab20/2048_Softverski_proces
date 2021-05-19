@@ -6,7 +6,6 @@
 package main;
 
 import gui.GameStage;
-import gui.game.Game;
 import javafx.application.Application;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
@@ -21,9 +20,8 @@ public class Main extends Application {
 
     @Override
     public void init() throws Exception {
-        Font.loadFont(Game.class.getResource("ClearSans-Bold.ttf").toExternalForm(), 10.0);
+        Font.loadFont(getClass().getResource("ClearSans-Bold.ttf").toExternalForm(), 10.0);
     }
-    
 
     @Override
     public void start(Stage stage) throws Exception {

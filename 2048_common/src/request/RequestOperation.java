@@ -13,5 +13,8 @@ import java.io.Serializable;
  */
 public enum RequestOperation implements Serializable {
     LOG_IN,
-    SING_UP
+    SING_UP,
+    UPDATE_USER,
+    START_GAME,
+    END_GAME
 }
