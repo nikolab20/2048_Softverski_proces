@@ -46,7 +46,7 @@ public class SocketCommunication {
         try {
             ObjectInputStream inSocket = new ObjectInputStream(socket.getInputStream());
             return (Response) inSocket.readObject();
-        } catch (Exception ex) {
+        } catch (IOException | ClassNotFoundException ex) {
             throw new Exception(ex.getMessage());
         }
     }

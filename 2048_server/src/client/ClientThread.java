@@ -50,7 +50,6 @@ public class ClientThread extends Thread {
                 response.setPayload(operation.getResult());
 
             } catch (Exception ex) {
-                ex.printStackTrace();
                 response.setStatus(ResponseStatus.ERROR);
                 response.setException(ex);
             }

@@ -41,7 +41,7 @@ public class LoginOperation extends GenericOperation<User, User> {
                 .orElseThrow(() -> new RuntimeException("Bad username!"));
         if (!user.getPassword().equals(entity.getPassword())) {
             throw new RuntimeException("Bad password!");
-        };
+        }
     }
 
 }

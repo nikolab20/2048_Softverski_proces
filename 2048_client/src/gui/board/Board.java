@@ -52,6 +52,7 @@ public class Board extends Group {
     private final Group gridGroup = new Group();
     private final IntegerProperty gameMovePoints = new SimpleIntegerProperty(0);
     private final IntegerProperty gameScoreProperty = new SimpleIntegerProperty(0);
+    private final IntegerProperty topScoreProperty = new SimpleIntegerProperty(0);
     private final Timeline animateAddedPoints = new Timeline();
 
     private final HBox overlay = new HBox();
@@ -122,6 +123,7 @@ public class Board extends Group {
                 -> (gameMovePoints.get() > 0) ? "+".concat(Integer.toString(gameMovePoints.get())) : "",
                 gameMovePoints.asObject()));
         lblScore.textProperty().bind(gameScoreProperty.asString());
+        lblBest.textProperty().bind(topScoreProperty.asString());
 
         lblScore.textProperty().addListener((ov, s, s1) -> {
             lblPoints.setLayoutX(0);
@@ -218,6 +220,14 @@ public class Board extends Group {
         gameScoreProperty.set(gameScoreProperty.get() + points);
     }
 
+    public void setTopScore(int score) {
+        topScoreProperty.set(score);
+    }
+
+    public void setScore(int score) {
+        gameScoreProperty.set(score);
+    }
+
     public void animateScore() {
         animateAddedPoints.playFromStart();
     }
@@ -240,6 +250,7 @@ public class Board extends Group {
             gridGroup.getChildren().removeIf(c -> c instanceof Tile);
             resetGame.set(false);
             gameScoreProperty.set(0);
+            topScoreProperty.set(0);
             gameWonProperty.set(false);
             gameOverProperty.set(false);
             resetGame.set(true);
@@ -282,5 +293,17 @@ public class Board extends Group {
 
     public BooleanProperty resetGameProperty() {
         return resetGame;
+    }
+
+    public void setResetGame(boolean reset) {
+        resetGame.set(reset);
+    }
+
+    public void clear() {
+        gridGroup.getChildren().clear();
+        GridOperator.traverseGrid((i, j) -> {
+            gridGroup.getChildren().add(createCell(i, j));
+            return 0;
+        });
     }
 }

@@ -14,6 +14,8 @@ import request.RequestOperation;
 /**
  *
  * @author nikolab
+ * @param <T>
+ * @param <R>
  */
 public abstract class GenericOperation<T extends DomainObject, R> {
 

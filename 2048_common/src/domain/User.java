@@ -37,7 +37,7 @@ public class User implements DomainObject {
         this.username = username;
         this.password = password;
     }
-    
+
     public User(Long id, String username, String password, int topScore) {
         this.id = id;
         this.username = username;
@@ -87,12 +87,13 @@ public class User implements DomainObject {
     @Override
     public DomainObject getNewRecord(ResultSet rs) {
         try {
+            System.out.println(rs.getInt("topScore"));
             long dbId = rs.getLong("id");
             String dbUSername = rs.getString("username");
             String dbPassword = rs.getString("password");
-            int dbTopScore = (int) rs.getLong("topScore");
+            int dbTopScore = rs.getInt("topScore");
 
-            return new User(dbId, dbUSername, dbPassword, topScore);
+            return new User(dbId, dbUSername, dbPassword, dbTopScore);
         } catch (SQLException ex) {
             throw new RuntimeException(ex);
         }
@@ -161,13 +162,8 @@ public class User implements DomainObject {
         if (!Objects.equals(this.password, other.password)) {
             return false;
         }
-        if (!Objects.equals(this.id, other.id)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.id, other.id);
     }
-
-    
 
     @Override
     public String toString() {

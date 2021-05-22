@@ -98,10 +98,7 @@ public class Response implements Serializable {
         if (!Objects.equals(this.exception, other.exception)) {
             return false;
         }
-        if (!Objects.equals(this.payload, other.payload)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.payload, other.payload);
     }
 
     @Override

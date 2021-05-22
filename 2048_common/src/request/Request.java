@@ -65,10 +65,7 @@ public class Request implements Serializable {
         if (this.operation != other.operation) {
             return false;
         }
-        if (!Objects.equals(this.data, other.data)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.data, other.data);
     }
 
     @Override

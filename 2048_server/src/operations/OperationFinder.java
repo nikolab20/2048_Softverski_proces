@@ -6,6 +6,8 @@
 package operations;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
@@ -46,12 +48,13 @@ public class OperationFinder {
                         SUPPORTED_OPERATIONS.put(requestOperation, operationClass);
                     }
                 }
-            } catch (Exception ex) {
+            } catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException
+                    | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException | MalformedURLException ex) {
                 // Silence is gold
             }
         }
     }
-    
+
     public static GenericOperation findOperation(RequestOperation operation) {
         try {
             return (GenericOperation) SUPPORTED_OPERATIONS.get(operation).newInstance();

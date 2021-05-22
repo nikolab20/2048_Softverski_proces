@@ -14,6 +14,7 @@ import domain.User;
 public class UserSession {
 
     private User user;
+    private int score;
     private static UserSession instance;
 
     public UserSession() {
@@ -32,5 +33,13 @@ public class UserSession {
 
     public User getUser() {
         return user;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
     }
 }

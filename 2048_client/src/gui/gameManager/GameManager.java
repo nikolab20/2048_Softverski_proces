@@ -10,6 +10,7 @@ import domain.Direction;
 import domain.GridOperator;
 import domain.Location;
 import domain.User;
+import gui.Move;
 import gui.board.Board;
 import gui.tile.Tile;
 import java.util.ArrayList;
@@ -31,13 +32,18 @@ import javafx.animation.ParallelTransition;
 import javafx.animation.ScaleTransition;
 import javafx.animation.SequentialTransition;
 import javafx.animation.Timeline;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.IntegerBinding;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.util.Duration;
 import utils.UserSession;
 
 /**
  *
- * @author nikolab
+ * @author nikolabgame
  */
 public class GameManager extends Group {
 
@@ -49,19 +55,35 @@ public class GameManager extends Group {
     private int tilesWereMoved = 0;
     private final Set<Tile> mergedToBeRemoved = new HashSet<>();
 
+    private final ObservableList<Move> moves;
+    private final IntegerBinding listSize;
+    private final BooleanBinding haveMoves;
+
     public GameManager() {
         board = new Board();
         getChildren().add(board);
 
+        moves = FXCollections.observableArrayList();
+        listSize = Bindings.size(moves);
+        haveMoves = listSize.greaterThan(0);
+
         board.resetGameProperty().addListener((ov, b, b1) -> {
             if (b1) {
+                board.clear();
                 initializeGameGrid();
                 startGame();
+                resetGame(false);
+                board.setScore(0);
+                moves.clear();
             }
         });
 
         initializeGameGrid();
         startGame();
+    }
+
+    public void resetGame(boolean reset) {
+        board.setResetGame(reset);
     }
 
     private void initializeGameGrid() {
@@ -77,24 +99,47 @@ public class GameManager extends Group {
     }
 
     private void startGame() {
-        Tile tile0 = Tile.newRandomTile();
-        List<Location> locCopy = locations.stream().collect(Collectors.toList());
-        Collections.shuffle(locCopy);
-        tile0.setLocation(locCopy.get(0));
-        gameGrid.put(tile0.getLocation(), tile0);
-        Tile tile1 = Tile.newRandomTile();
-        tile1.setLocation(locCopy.get(1));
-        gameGrid.put(tile1.getLocation(), tile1);
+        try {
+            Controller.getInstance().startGame();
+            board.setTopScore(UserSession.getInstance().getUser().getTopScore());
 
-        redrawTilesInGameGrid();
+            Tile tile0 = Tile.newRandomTile();
+            List<Location> locCopy = locations.stream().collect(Collectors.toList());
+            Collections.shuffle(locCopy);
+            tile0.setLocation(locCopy.get(0));
+            gameGrid.put(tile0.getLocation(), tile0);
+            Tile tile1 = Tile.newRandomTile();
+            tile1.setLocation(locCopy.get(1));
+            gameGrid.put(tile1.getLocation(), tile1);
+
+            redrawTilesInGameGrid();
+        } catch (Exception ex) {
+            System.out.println(ex);
+        }
     }
 
     private void redrawTilesInGameGrid() {
         gameGrid.values().stream().filter(Objects::nonNull).forEach(board::addTile);
-        System.out.println(board.getGridGroup().getChildren().stream().collect(Collectors.toList()));
     }
 
     public void move(Direction direction) throws Exception {
+
+        Map<Location, Tile> oldGrid = new HashMap<>();
+
+        gameGrid.forEach((location, tile) -> {
+            Location l = new Location(location.getX(), location.getY());
+            Tile t;
+            if (tile != null) {
+                t = Tile.newTile(tile.getValue());
+                t.setLocation(l);
+            } else {
+                t = null;
+            }
+            oldGrid.put(l, t);
+        });
+
+        Move move = new Move(oldGrid, board.getScore());
+
         synchronized (gameGrid) {
             if (movingTiles) {
                 return;
@@ -154,7 +199,6 @@ public class GameManager extends Group {
                 }
             } else {
                 if (mergeMovementsAvailable() == 0) {
-                    System.out.println("Game Over");
                     board.setGameOver(true);
                 }
             }
@@ -167,18 +211,32 @@ public class GameManager extends Group {
         parallelTransition.play();
         parallelTransition.getChildren().clear();
 
+        if (tilesWereMoved > 0) {
+            if (moves.size() == 5) {
+                moves.remove(0);
+            }
+
+            moves.add(move);
+        }
+
+        if (board.getScore() > UserSession.getInstance().getScore()) {
+            UserSession.getInstance().setScore(board.getScore());
+        }
+
         if (board.getScore() > UserSession.getInstance().getUser().getTopScore()) {
             try {
                 User user = UserSession.getInstance().getUser();
                 user.setTopScore(board.getScore());
                 user = Controller.getInstance().update(user);
                 UserSession.getInstance().setUser(user);
+                board.setTopScore(user.getTopScore());
             } catch (Exception ex) {
                 throw ex;
             }
         }
 
         if (board.getGameOver()) {
+            moves.clear();
             Controller.getInstance().endGame();
         }
     }
@@ -274,5 +332,24 @@ public class GameManager extends Group {
 
     private Optional<Tile> optionalTile(Location loc) {
         return Optional.ofNullable(gameGrid.get(loc));
+    }
+
+    public BooleanBinding getHaveAvailableMoves() {
+        return haveMoves;
+    }
+
+    public void undoMove() {
+        int index = moves.size() - 1;
+        Move move = moves.get(index);
+        board.clear();
+        initializeGameGrid();
+        move.getGameGrid().values().forEach((tile) -> {
+            if (tile != null) {
+                gameGrid.put(tile.getLocation(), tile);
+            }
+        });
+        redrawTilesInGameGrid();
+        board.setScore(move.getScore());
+        moves.remove(index);
     }
 }

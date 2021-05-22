@@ -7,7 +7,6 @@ package communication;
 
 import domain.Game;
 import domain.User;
-import java.io.IOException;
 import java.util.Date;
 import request.Request;
 import request.RequestOperation;
@@ -42,6 +41,7 @@ public class Controller {
         socketCommunication.sendRequest(request);
         Response response = socketCommunication.readResponse();
         if (response.getStatus() == ResponseStatus.SUCCESS) {
+            System.out.println(response.getPayload());
             return (User) response.getPayload();
         }
         throw response.getException();
@@ -73,18 +73,23 @@ public class Controller {
     }
 
     public Game startGame() throws Exception {
-        Game game = new Game(UserSession.getInstance().getUser().getId(), 0, new Date());
-        Request request = new Request(RequestOperation.START_GAME, game);
+        if (game != null) {
+            this.endGame();
+        }
+        Game r = new Game(UserSession.getInstance().getUser().getId(), 0, new java.sql.Date(new Date().getTime()));
+        Request request = new Request(RequestOperation.START_GAME, r);
         socketCommunication.sendRequest(request);
         Response response = socketCommunication.readResponse();
         if (response.getStatus() == ResponseStatus.SUCCESS) {
             this.game = (Game) response.getPayload();
+            UserSession.getInstance().setScore(0);
             return this.game;
         }
         throw response.getException();
     }
 
     public Game endGame() throws Exception {
+        this.game.setScore(UserSession.getInstance().getScore());
         Request request = new Request(RequestOperation.END_GAME, game);
         socketCommunication.sendRequest(request);
         Response response = socketCommunication.readResponse();

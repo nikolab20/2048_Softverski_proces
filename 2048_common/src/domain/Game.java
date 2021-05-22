@@ -67,7 +67,8 @@ public class Game implements DomainObject {
         StringBuilder sb = new StringBuilder();
         sb.append("userId=").append(userId).
                 append(",score=").append(score)
-                .append(",date=").append(date);
+                .append(",date='").append(date)
+                 .append("'");
         return sb.toString();
     }
 
@@ -157,10 +158,7 @@ public class Game implements DomainObject {
         if (!Objects.equals(this.userId, other.userId)) {
             return false;
         }
-        if (!Objects.equals(this.date, other.date)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.date, other.date);
     }
 
     @Override
